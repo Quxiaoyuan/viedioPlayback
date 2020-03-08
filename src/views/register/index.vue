@@ -5,11 +5,14 @@
         </div>
         <div class="form-box">
             <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px">
-                <el-form-item label=" " prop="email">
-                    <el-input v-model="ruleForm.email" placeholder="昵称"></el-input>
+                <el-form-item label=" " prop="username">
+                    <el-input v-model="ruleForm.username" placeholder="用户名"></el-input>
                 </el-form-item>
                 <el-form-item label=" " prop="password">
                     <el-input v-model="ruleForm.password" placeholder="密码"></el-input>
+                </el-form-item>
+                <el-form-item label=" " prop="email">
+                    <el-input v-model="ruleForm.email" placeholder="邮箱"></el-input>
                 </el-form-item>
             </el-form>
             <div class="login-button">
@@ -24,22 +27,26 @@ export default {
     data() {
         return {
             ruleForm: {
+                username: '',
+                password: '',
                 email: '',
-                password: ''
             },
             rules: {
-                email: [
-                    { required: true, message: '请输入昵称', trigger: 'blur' }
+                username: [
+                    { required: true, message: '请输入用户名', trigger: 'blur' }
                 ],
                 password: [
                     { required: true, message: '请输入密码', trigger: 'blur' }
+                ],
+                email: [
+                    { required: true, message: '请输入邮箱', trigger: 'blur' }
                 ]
             }
         }
     },
     computed: {
         isDisabled() {
-            return !this.ruleForm.email || !this.ruleForm.password;
+            return !this.ruleForm.email || !this.ruleForm.password || !this.ruleForm.username;
         }
     },
     methods: {
@@ -47,11 +54,12 @@ export default {
             const { ruleForm } = this;
             const params = {
                 email: ruleForm.email,
-                password: ruleForm.password
+                password: ruleForm.password,
+                username: ruleForm.username
             }
             const res = await this.$store.dispatch('registerAction', params);
-            if (res) {
-                debugger;
+            if (res && res.status === 200) {
+                this.$router.push({ path: '/login' });
             }
         },
     }

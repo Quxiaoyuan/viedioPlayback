@@ -5,7 +5,7 @@
         </div>
         <div class="form-box">
             <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px">
-                <el-form-item label="账号" prop="email">
+                <el-form-item label="邮箱" prop="email">
                     <el-input v-model="ruleForm.email" placeholder="请输入账号"></el-input>
                 </el-form-item>
                 <el-form-item label="密码" prop="password">
@@ -36,7 +36,7 @@ export default {
             },
             rules: {
                 email: [
-                    { required: true, message: '请输入账号', trigger: 'blur' }
+                    { required: true, message: '请输入邮箱账号', trigger: 'blur' }
                 ],
                 password: [
                     { required: true, message: '请输入密码', trigger: 'blur' }
@@ -51,23 +51,30 @@ export default {
     },
     methods: {
         ...mapMutations({
-            updateLoginHandle: 'updateLoginStatus'
+            updateLoginHandle: 'updateLoginStatus',
+            updateUserInfo: 'updateUserInfo'
         }),
         async loginHandle() {
-            // const { ruleForm } = this;
-            // const params = {
-            //     email: ruleForm.email,
-            //     password: ruleForm.password
-            // }
-            // const res = await this.$store.dispatch('loginAction', params);
-            // if (res && res.code === '200') {
-            //     this.$router.push({path: '/home'});
-            // }
-            this.updateLoginHandle(true);
-            this.$router.push({path: '/home'});
+            const { ruleForm } = this;
+            const params = {
+                email: ruleForm.email,
+                password: ruleForm.password
+            }
+            const res = await this.$store.dispatch('loginAction', params);
+            if (res) {
+                const data = res.data || {};
+                if (data) {
+                    this.updateUserInfo(data.data);
+                }
+                this.updateLoginHandle(true);
+                this.$router.push({path: '/home'});
+            }
         },
         registerHandle() {
             this.$router.push({path: '/register'});
+        },
+        checkAuth() {
+
         }
     }
 }

@@ -3,11 +3,15 @@ import Vue from 'vue'
 import Vuex from 'vuex';
 
 const state = {
-    isLogin: false
+    isLogin: false,
+    userInfo: {}
 };
 const mutations = {
     updateLoginStatus({ commit }, params) {
         state.isLogin = params;
+    },
+    updateUserInfo({ commit }, params) {
+        state.userInfo = params;
     }
 };
 const actions = {
@@ -17,6 +21,10 @@ const actions = {
     },
     async registerAction({ commit }, params) {
         const res = await Api.register(params);
+        return res;
+    },
+    async dynamicList({ commit }) {
+        const res = await Api.dynamicList();
         return res;
     }
 };

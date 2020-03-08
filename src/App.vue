@@ -32,6 +32,9 @@ export default {
             isLogin: state => state.isLogin
         })
     },
+    created() {
+        this.checkAuth();
+    },
     methods: {
         ...mapMutations({
             updateLoginHandle: 'updateLoginStatus'
@@ -48,21 +51,36 @@ export default {
         },
         tabHandleClick() {
 
+        },
+        checkAuth() {
+            if (this.isLogin) {
+                debugger;
+                const params = {
+                    objectId: ''
+                };
+                const res = this.$store.dispatch('queryUserInfo', params);
+                if (res) {
+                    debugger;
+                }
+            }
         }
-    },
-    watch: {
-        // '$route'(to, from) {
-            
-        // }
     }
 }
 </script>
 
 <style lang="less">
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+}
 #app {
     width: 100%;
     height: 100%;
     overflow: hidden;
+    background: #f6f6f6;
+    position: relative;
 }
 .app-header {
     width: 100%;
