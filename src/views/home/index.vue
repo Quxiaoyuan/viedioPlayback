@@ -60,7 +60,8 @@ export default {
         },
         getUrl(base64) {
             // debugger;
-            return `data:video/mp4;base64,${base64}`;
+            // return `data:video/mp4;base64,${base64}`;
+            return `http://localhost:8088${base64}`;
             // return this.dataURLtoFile(base64, '');
         },
         dataURLtoFile(dataurl, filename) {//将base64转换为文件

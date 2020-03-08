@@ -29,8 +29,9 @@ const axiosMiddlewares = () => {
 }
 axiosMiddlewares();
 
-const baseURL = 'http://106.13.198.47:8088';
+// const baseURL = 'http://106.13.198.47:8088';
 // const baseURL = 'http://117.166.64.24:8088';
+const baseURL = 'http://localhost:8088';
 
 const axiosHandle = (url, params, option) => {
     return new Promise((resolve, reject) => {
