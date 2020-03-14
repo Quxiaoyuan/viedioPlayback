@@ -2,6 +2,7 @@ import { $post, $get } from '../axios';
 
 export default {
     login(params) {
+        
         return $post('/user/userLogin', params);
     },
     register(params) {
