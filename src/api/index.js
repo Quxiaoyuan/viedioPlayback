@@ -116,7 +116,7 @@ export default {
     },
     /**
      * 输出评论
-     * @param {objectId} params
+     * @param {dyId} params
      */
     commentInput(params) {
         return $post('/comment/commentOut', params);

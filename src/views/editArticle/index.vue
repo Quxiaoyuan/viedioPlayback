@@ -1,6 +1,6 @@
 <template>
     <div class="edit-article">
-        <el-upload
+        <!-- <el-upload
             class="avatar-uploader"
             :action="actionUrl"
             accept='.mp4,.qlv,.qsv,.ogg,.flv,.avi,.wmv,.rmvb'
@@ -27,7 +27,21 @@
                 :percentage="videoUploadPercent"
                 style="margin-top:30px"
             ></el-progress>
-        </el-upload>
+        </el-upload> -->
+        <el-form label-position="right" ref="ruleForm" label-width="80px" :model="formLabelAlign" :rules="rules">
+            <el-form-item label="动态标题" prop="title">
+                <el-input v-model="formLabelAlign.title"></el-input>
+            </el-form-item>
+            <el-form-item label="视频地址" prop="address">
+                <el-input v-model="formLabelAlign.address"></el-input>
+            </el-form-item>
+            <el-form-item label="动态描述" prop="description">
+                <el-input v-model="formLabelAlign.description"></el-input>
+            </el-form-item>
+            <el-form-item>
+                <el-button type="primary" @click="submitForm('ruleForm')">立即发表</el-button>
+            </el-form-item>
+        </el-form>
     </div>
 </template>
 
@@ -43,12 +57,26 @@ export default {
                 title: '111'
             },
             Video: '',
-            actionUrl: 'http://106.13.198.47:8088/dynamic/saveDynamic'
+            actionUrl: 'http://106.13.198.47:8088/dynamic/saveDynamic',
+            formLabelAlign: {
+                title: '',
+                address: 'https://www.runoob.com/try/demo_source/movie.mp4',
+                description: ''
+            },
+            rules: {
+                title: [
+                    { required: true, message: '请输入动态标题', trigger: 'blur' },
+                ],
+                address: [
+                    { required: true, message: '请输入视频地址', trigger: 'blur' }
+                ],
+                description: [
+                    { required: true, message: '请填写动态描述', trigger: 'blur' }
+                ]
+            }
         }
     },
     created() {
-        const objectId = this.getUserInfo.objectId || '';
-        this.paramsdata.sendId = objectId;
     },
     computed: {
         ...mapState({
@@ -56,28 +84,29 @@ export default {
         })
     },
     methods: {
-        beforeUploadVideo(file) {          //视频上传之前判断他的大小
-            const isLt10M = file.size / 1024 / 1024  < 2000;
-            if (!isLt10M) {
-                this.$message.error('上传视频大小不能超过2000MB哦!');
-                return false;
+        submitForm(ref) {
+            this.$refs[ref].validate((valid) => {
+                if (valid) {
+                    this.dynamicPost();
+                } else {
+                    console.log('error submit!!');
+                    return false;
+                }
+            });
+        },
+        async dynamicPost() {
+            const { title, address, description } = this.formLabelAlign;
+            const params = {
+                video: address,
+                sendId: this.getUserInfo.objectId,
+                title,
+                description
+            };
+            const res = await this.$store.dispatch('dynamicPost', params);
+            if (res && res.data.code == '0') {
+                this.$router.push('/home');
             }
-            this.paramsdata.video = file;
-        },
-        uploadVideoProcess(event, file, fileList){    //视频上传的时候获取上传进度传给进度条
-            this.videoFlag = true;
-            this.videoUploadPercent = parseInt(file.percentage);
-            console.log(this.videoUploadPercent)
-        },
-        handleVideoSuccess(res, file) {           //视频上传成功之后返回视频地址
-            this.videoFlag = false;
-            this.videoUploadPercent = 0;
-            console.log(res)
-            const url = URL.createObjectURL(file.raw); 
-            this.Video = url;
-        },
-        handleVideoError(err, file, fileList) {
-            debugger;
+
         }
     }
 }

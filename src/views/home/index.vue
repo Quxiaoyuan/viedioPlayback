@@ -5,29 +5,37 @@
       <div class="left-container">
         <div class="left-container-scroll">
           <div class="left-card" v-for="(item, index) in cardList" :key="index">
-            <div class="left-card-title">227事件对肖战会有不利影响吗？</div>
+            <div class="left-card-title">{{item.title}}</div>
             <div class="left-card-container">
-              <video width="350" height="180" controls="controls">
-                <source :src="getUrl(item.content)" type="video/mp4" />您的浏览器不支持视频播放
+              <video :ref="'video' + index" width="350" height="180" controls="controls">
+                <source :src="item.content" type="video/mp4" />您的浏览器不支持视频播放
               </video>
-              <span>别在这和我bb什么雪花不雪花</span>
+              <!-- <video width="350" height="180" controls="controls">
+                <source :src="src" type="video/mp4" />您的浏览器不支持视频播放
+              </video> -->
+              <span>{{item.description}}</span>
             </div>
             <div class="card-foot">
-              <el-button 
+              <!-- <el-button 
                 icon="el-icon-view" 
                 size="small" 
                 type="primary"
-                @click="attentionHandle">关注</el-button>
-              <div class="card-food-common" @click="commentHandle">
+                @click="attentionHandle">关注</el-button> -->
+              <div class="card-food-common" @click="commentHandle(item, index)">
                 <i class="el-icon-s-comment"></i>
-                <span>评论</span>
+                <span>{{item.showComment ? '收起评论' : '评论'}}</span>
               </div>
-              <div class="card-food-common" @click="collectHandle">
+              <div class="card-food-common" @click="collectHandle(item)">
                 <i class="el-icon-star-on"></i>
                 <span>收藏</span>
               </div>
             </div>
-            <comment v-show="showComment"></comment>
+            <comment 
+              v-show="item.showComment" 
+              :commentList="item.commentList"
+              :sendId="item.sendId"
+              :objectId="item.objectId"
+              @commentSuccess="commentHandle(item, index)"></comment>
           </div>
         </div>
       </div>
@@ -45,13 +53,14 @@
 
 <script>
 import comment from './components/comment';
+import { mapState } from 'vuex';
+
 export default {
   data() {
     return {
       baseUrl: "http://106.13.198.47:20",
-      cardList: [1,2,3],
-      src: "../assets/video/video.mp4",
-      showComment: false
+      cardList: [],
+      src: ""
     };
   },
   created() {
@@ -60,45 +69,79 @@ export default {
   components: {
     comment
   },
+  computed: {
+    ...mapState({
+        getUserInfo: state => state.userInfo
+      })
+  },
   methods: {
     async reqDynamicList() {
       const res = await this.$store.dispatch("dynamicList");
       if (res) {
-        debugger;
         const data = res.data || {};
         this.cardList = data.data || [];
+        this.$nextTick(() => {
+          this.setSrc();
+          this.setPropShowComment();
+        })
       }
+    },
+    setPropShowComment() {
+      this.cardList.forEach((item) => {
+        this.$set(item, 'showComment', false);
+        this.$set(item, 'commentList', []);
+      })
+    },
+    setSrc() {
+      this.cardList.forEach((item, index) => {
+        const refs = this.$refs[`video${index}`] || [];
+        if (refs.length) {
+          refs.forEach((ref) => {
+            ref && ref.load();
+          })
+        }
+      })
     },
     toEditArticle() {
       this.$router.push({ path: "/editArticle" });
     },
-    getUrl(base64) {
-      // debugger;
-      // return `data:video/mp4;base64,${base64}`;
-      return `http://localhost:8088${base64}`;
-      // return this.dataURLtoFile(base64, '');
-    },
-    dataURLtoFile(dataurl, filename) {
-      //将base64转换为文件
-      debugger;
-      const arr = dataurl.split(",");
-      // const mime = arr[0].match(/:(.*?);/)[1];
-      const bstr = atob(arr[1]);
-      let n = bstr.length;
-      const u8arr = new Uint8Array(n);
-      while (n--) {
-        u8arr[n] = bstr.charCodeAt(n);
-      }
-      return new File([u8arr], filename, { type: mime });
-    },
     attentionHandle() {
 
     },
-    commentHandle() {
-      this.showComment = !this.showComment;
+    async commentHandle(item, index) {
+      item.showComment = !item.showComment;
+      if (!item.showComment) return;
+      const params = {
+        dyId: item.objectId
+      };
+      const res = await this.$store.dispatch('commentInput', params);
+      if (res && res.data) {
+        const commentList = res.data.data;
+        if (commentList.length) {
+          commentList.forEach((it) => {
+            if (it.commentforcomList && it.commentforcomList.length) {
+              it.commentforcomList.forEach((x) => {
+                x.showComment = false;
+                x.commentContent = '';
+              })
+            }
+            it.showComment = false;
+            it.commentContent = '';
+          })
+          this.$set(this.cardList[index], 'commentList', commentList);
+        }
+      }
+      console.log(this.cardList);
     },
-    collectHandle() {
-
+    async collectHandle(item) {
+      const params = {
+        userId: this.getUserInfo.objectId,
+        dyId: item.objectId
+      };
+      const res = await this.$store.dispatch('addFavorite', params);
+      if (res) {
+        debugger;
+      }
     }
   }
 };

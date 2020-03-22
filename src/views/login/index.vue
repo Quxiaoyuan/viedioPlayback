@@ -61,13 +61,15 @@ export default {
                 password: ruleForm.password
             }
             const res = await this.$store.dispatch('loginAction', params);
-            if (res) {
+            if (res && res.data && res.data.code == '0') {
                 const data = res.data || {};
                 if (data) {
                     this.updateUserInfo(data.data);
                 }
                 this.updateLoginHandle(true);
                 this.$router.push({path: '/home'});
+            } else {
+                console.log(res.data.msg)
             }
         },
         registerHandle() {

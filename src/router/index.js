@@ -57,10 +57,18 @@ const router = new Router({
 
 router.beforeEach((to, from, next) => {
 	const isLogin = store.state.isLogin;
-	if (isLogin && to.name === 'login') {
-		next(false);
+	if (isLogin) {
+		if (to.name === 'login' || to.name === 'register') {
+			next(false);
+		} else {
+			next();
+		}
 	} else {
-		next();
+		if (to.name === 'login' || to.name === 'register') {
+			next();
+		} else {
+			next({path: '/login'});
+		}
 	}
 })
 

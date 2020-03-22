@@ -3,47 +3,65 @@
     <div class="comment-container">
       <div class="comment-container-topbar">
         <div class="topbar-title">
-          143条评论
+          {{commentList.length}}条评论
         </div>
         <div class="topbar-options">
           选项
         </div>
       </div>
       <div class="comment-container-middle">
-        <ul class="comment-list">
+        <ul 
+          class="comment-list"
+          v-for="(item, index) in commentList"
+          :key="index">
           <li class="comment-root">
             <div class="comment-item">
               <div class="item-top">
                 <i></i>
-                <span class="item-replay">jgdskgslk</span>
-                <span class="float-right">21天前</span>
+                <span class="item-replay">{{item.senderId}}</span>
+                <span class="float-right">{{item.createTime}}</span>
               </div>
-              <div class="item-container">粉红色发哈开发</div>
-              <div class="item-replay-icon" @click="replayHandle">
+              <div class="item-container">{{item.content}}</div>
+              <div class="item-replay-icon">
                 <i class="el-icon-chat-dot-square"></i>
-                <span>回复</span>
+                <span @click.stop="replayHandle(item, index)">回复</span>
               </div>
-              <div class="item-replay-input">
-                <input class="input" type="text" placeholder="回复">
-                <el-button size="mini" type="primary">发布</el-button>
+              <div v-show="item.showComment" class="item-replay-input">
+                <input class="input" v-model="item.commentContent" type="text" :placeholder="`回复${item.senderId}`">
+                <el-button size="mini" type="primary" @click="sendCommentHandle1(item)">发布</el-button>
               </div>
             </div>
           </li>
-          <li class="comment-child">
+          <li 
+            class="comment-child"
+            v-for="(li, liIndex) in item.commentforcomList"
+            :key="liIndex">
             <div class="comment-item">
               <div class="item-top">
                 <i></i>
                 <div class="item-replay">
-                  <span>kkkkk</span>
+                  <span>{{li.senderId}}</span>
                   <span>回复</span>
-                  <span>jgdskgslk</span>
+                  <span>{{item.senderId}}</span>
                 </div>
-                <span>21天前</span>
+                <span>{{li.createTime}}</span>
               </div>
-              <div class="item-container">后方可死灵法师开发</div>
+              <div class="item-container">{{li.content}}</div>
+              <div class="item-replay-icon">
+                <i class="el-icon-chat-dot-square"></i>
+                <span @click.stop="replayHandle(li, index, liIndex, true)">回复</span>
+              </div>
+              <div v-show="li.showComment" class="item-replay-input">
+                <input class="input" v-model="li.commentContent" type="text" :placeholder="`回复${li.senderId}`">
+                <el-button size="mini" type="primary" @click="sendCommentHandle1(li, item, true)">发布</el-button>
+              </div>
             </div>
           </li>
         </ul>
+        <div class="foot-replay-input">
+          <input class="input" v-model="commentContent" type="text" placeholder="写下你的评论吧，这里需要你">
+          <el-button size="mini" type="primary" @click="sendCommentHandle">发布</el-button>
+        </div>
       </div>
       <div class="comment-container-foot"></div>
     </div>
@@ -51,13 +69,71 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
+
 export default {
+  props: {
+    commentList: {
+      type: Array,
+      default() {
+        return []
+      }
+    },
+    sendId: {
+      type: String | Number,
+      default: ''
+    },
+    objectId: {
+      type: String | Number,
+      default: ''
+    }
+  },
   data() {
-    return {}
+    return {
+      commentContent: ''
+    }
+  },
+  computed: {
+    ...mapState({
+        getUserInfo: state => state.userInfo
+      })
   },
   methods: {
-    replayHandle() {
-
+    replayHandle(item, index, childIndex, isChild) {
+      const showComment = item.showComment;
+      if (isChild) {
+        this.$set(this.commentList[index].commentforcomList[childIndex], 'showComment', !showComment);
+      } else {
+        this.$set(this.commentList[index], 'showComment', !showComment);
+      }
+      
+    },
+    async sendCommentHandle1(item, pItem, child = false) {
+      debugger
+      if (!item.commentContent) return;
+      const params = {
+        senderId: this.getUserInfo.objectId,
+        recipId: item.senderId,
+        commentId: child ? pItem.objectId : item.objectId,
+        content: item.commentContent 
+      };
+      const res = await this.$store.dispatch('addcomment', params); 
+      if (res) {
+        this.$emit('commentSuccess');
+      }
+    },
+    async sendCommentHandle() {
+       if (!this.commentContent) return;
+      const params = {
+        senderId: this.getUserInfo.objectId,
+        recipId: this.sendId,
+        dyId: this.objectId,
+        content: this.commentContent 
+      };
+      const res = await this.$store.dispatch('addcommentDynamic', params); 
+      if (res) {
+        this.$emit('commentSuccess');
+      }
     }
   }
 }
@@ -151,6 +227,20 @@ export default {
         }
       }
     }
+  }
+}
+.foot-replay-input {
+  padding: 12px 12px 12px 33px;
+  display: flex;
+  align-items: center;
+  .input {
+    flex: 1;
+    height: 30px;
+    border-radius: 4px;
+    outline: none;
+    border: 1px solid #8590a6;
+    padding-left: 6px;
+    margin-right: 10px;
   }
 }
 .float-right {

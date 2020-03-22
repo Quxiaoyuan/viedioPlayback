@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <div class="app-header" :class="isLogin ? 'flex-header' : ''">
-			<nav>
+			<nav v-if="isLogin">
 				<el-menu :default-active="activeNavIndex"
 								mode="horizontal"
 								class="el-menu-demo"
@@ -11,12 +11,12 @@
 								@select="handleNavSelect">
 					<el-menu-item index="myHomePage">我的主页</el-menu-item>
 					<el-menu-item index="myCollectPage">我的收藏</el-menu-item>
-					<el-menu-item index="myHistoryPage">历史记录</el-menu-item>
+					<el-menu-item index="myHistoryPage">我的关注</el-menu-item>
 					<!-- <el-menu-item index="personalPage">个人中心</el-menu-item> -->
 				</el-menu>
 			</nav>
 
-      <div v-if="!isLogin">
+      <div v-if="!isLogin" class="login-header">
         <el-button type="primary" @click="toLogin">登录</el-button>
         <el-button @click="toRegister">注册</el-button>
       </div>
@@ -158,8 +158,11 @@ ul {
 			border-radius: 50%;	
 			cursor:pointer;
 		}
-	}
+  }
 }
+.login-header {
+    padding: 10px 272px;
+  }
 .app-content{
 	width: 66%;
   height: 100%;
