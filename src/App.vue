@@ -116,6 +116,11 @@ body {
   overflow: hidden;
   position: relative;
 }
+ul {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
 #app {
   width: 100%;
   height: 100%;

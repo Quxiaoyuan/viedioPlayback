@@ -12,6 +12,22 @@
               </video>
               <span>别在这和我bb什么雪花不雪花</span>
             </div>
+            <div class="card-foot">
+              <el-button 
+                icon="el-icon-view" 
+                size="small" 
+                type="primary"
+                @click="attentionHandle">关注</el-button>
+              <div class="card-food-common" @click="commentHandle">
+                <i class="el-icon-s-comment"></i>
+                <span>评论</span>
+              </div>
+              <div class="card-food-common" @click="collectHandle">
+                <i class="el-icon-star-on"></i>
+                <span>收藏</span>
+              </div>
+            </div>
+            <comment v-show="showComment"></comment>
           </div>
         </div>
       </div>
@@ -19,26 +35,30 @@
     <div class="home-right-slide">
       <div class="card">
         <span class="card-span" @click="toEditArticle">
-          <i class="icon-article"></i>
-          <span>写文章</span>
+          <i class="el-icon-edit-outline"></i>
+          <span>发表动态</span>
         </span>
-        <span class="card-span">写文章</span>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import comment from './components/comment';
 export default {
   data() {
     return {
       baseUrl: "http://106.13.198.47:20",
-      cardList: [],
-      src: "../assets/video/video.mp4"
+      cardList: [1,2,3],
+      src: "../assets/video/video.mp4",
+      showComment: false
     };
   },
   created() {
     this.reqDynamicList();
+  },
+  components: {
+    comment
   },
   methods: {
     async reqDynamicList() {
@@ -70,6 +90,15 @@ export default {
         u8arr[n] = bstr.charCodeAt(n);
       }
       return new File([u8arr], filename, { type: mime });
+    },
+    attentionHandle() {
+
+    },
+    commentHandle() {
+      this.showComment = !this.showComment;
+    },
+    collectHandle() {
+
     }
   }
 };
@@ -77,6 +106,8 @@ export default {
 
 <style lang="less" scoped>
 .app-home {
+	width: 100%;
+	height: 100%;
 	display: flex;
   .home-left-slide {
     width: 694px;
@@ -89,7 +120,7 @@ export default {
     }
     .left-container {
       height: calc(100% - 100px);
-      overflow: scroll;
+      overflow: auto;
       position: relative;
       .left-container-scroll {
         padding-bottom: 100px;
@@ -106,8 +137,23 @@ export default {
         .left-card-container {
           display: flex;
         }
+        .card-foot {
+          display: flex;
+          align-items: center;
+          padding: 10px 0;
+          color: #8590a6;
+          font-size: 16px;
+          .card-food-common {
+            margin-left: 20px;
+            cursor: pointer;
+            i {
+              font-size: 15px;
+            }
+          }
+        }
       }
     }
+
   }
   .home-right-slide {
     flex: 1;
@@ -129,6 +175,11 @@ export default {
         height: 94px;
         justify-content: center;
         position: relative;
+        font-size: 14px;
+        i {
+          font-size: 20px;
+          margin-bottom: 10px;
+        }
       }
     }
   }
