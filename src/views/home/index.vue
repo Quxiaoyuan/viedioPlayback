@@ -25,9 +25,9 @@
                 <i class="el-icon-s-comment"></i>
                 <span>{{item.showComment ? '收起评论' : '评论'}}</span>
               </div>
-              <div class="card-food-common" @click="collectHandle(item)">
+              <div class="card-food-common" @click="collectHandle(item, index)">
                 <i class="el-icon-star-on"></i>
-                <span>收藏</span>
+                <span>{{item.type === 1 ? '取消收藏' : '收藏'}}</span>
               </div>
             </div>
             <comment 
@@ -76,7 +76,10 @@ export default {
   },
   methods: {
     async reqDynamicList() {
-      const res = await this.$store.dispatch("dynamicList");
+      const params = {
+        objectId: this.getUserInfo.objectId
+      };
+      const res = await this.$store.dispatch("dynamicList", params);
       if (res) {
         const data = res.data || {};
         this.cardList = data.data || [];
@@ -133,14 +136,22 @@ export default {
       }
       console.log(this.cardList);
     },
-    async collectHandle(item) {
+    async collectHandle(item, index) {
       const params = {
         userId: this.getUserInfo.objectId,
         dyId: item.objectId
       };
-      const res = await this.$store.dispatch('addFavorite', params);
-      if (res) {
-        debugger;
+      const type = this.cardList[index].type;
+      const url = type === 1 ? 'cancelFavorite' : 'addFavorite';
+      const res = await this.$store.dispatch(url, params);
+      if (res && res.data) {
+        const setType = type === 0 ? 1 : 0;
+        this.$set(this.cardList[index], 'type', setType);
+        this.$message({
+            showClose: true,
+            message: res.data.msg,
+            type: 'success'
+        });
       }
     }
   }

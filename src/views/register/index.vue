@@ -9,7 +9,7 @@
                     <el-input v-model="ruleForm.username" placeholder="用户名"></el-input>
                 </el-form-item>
                 <el-form-item label=" " prop="password">
-                    <el-input v-model="ruleForm.password" placeholder="密码"></el-input>
+                    <el-input type="password" v-model="ruleForm.password" placeholder="密码"></el-input>
                 </el-form-item>
                 <el-form-item label=" " prop="email">
                     <el-input v-model="ruleForm.email" placeholder="邮箱"></el-input>
@@ -58,8 +58,16 @@ export default {
                 username: ruleForm.username
             }
             const res = await this.$store.dispatch('registerAction', params);
-            if (res && res.status === 200) {
+            if (res && res.data.code == '0') {
+                this.$message({
+                    showClose: true,
+                    message: '注册成功',
+                    type: 'success'
+                });
                 this.$router.push({ path: '/login' });
+            } else {
+                const msg = res.data.msg || '注册异常，请确认网络是否良好'
+                this.$message.error(msg);
             }
         },
     }

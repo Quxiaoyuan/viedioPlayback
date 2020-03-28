@@ -9,7 +9,7 @@
                     <el-input v-model="ruleForm.email" placeholder="请输入账号"></el-input>
                 </el-form-item>
                 <el-form-item label="密码" prop="password">
-                    <el-input v-model="ruleForm.password" placeholder="请输入密码"></el-input>
+                    <el-input type="password" v-model="ruleForm.password" placeholder="请输入密码"></el-input>
                 </el-form-item>
             </el-form>
             <div class="login-button">
@@ -64,11 +64,22 @@ export default {
             if (res && res.data && res.data.code == '0') {
                 const data = res.data || {};
                 if (data) {
+                    this.$message({
+                        showClose: true,
+                        message: '登录成功',
+                        type: 'success'
+                    });
                     this.updateUserInfo(data.data);
                 }
                 this.updateLoginHandle(true);
                 this.$router.push({path: '/home'});
             } else {
+                const msg = res.data && res.data.msg || '登录异常';
+                this.$message({
+                    showClose: true,
+                    message: msg,
+                    type: 'error'
+                });
                 console.log(res.data.msg)
             }
         },

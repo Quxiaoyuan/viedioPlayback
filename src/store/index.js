@@ -25,11 +25,12 @@ const actions = {
 			return res;
     },
     async dynamicPost({ commit }, params) {
+      debugger
 			const res = await Api.dynamicPost(params);
 			return res;
     },
-    async dynamicList({ commit }) {
-			const res = await Api.dynamicList();
+    async dynamicList({ commit }, params) {
+			const res = await Api.dynamicList(params);
 			return res;
     },
     async commentInput({ commit }, params) {
@@ -50,6 +51,10 @@ const actions = {
     },
     async myFavorite({ commit }, params) {
       const res = await Api.myFavorite(params);
+      return res;
+    },
+    async cancelFavorite({ commit }, params) {
+      const res = await Api.cancelFavorite(params);
       return res;
     }
 };

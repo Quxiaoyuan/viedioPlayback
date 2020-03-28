@@ -57,7 +57,6 @@ export default {
                 title: '111'
             },
             Video: '',
-            actionUrl: 'http://106.13.198.47:8088/dynamic/saveDynamic',
             formLabelAlign: {
                 title: '',
                 address: 'https://www.runoob.com/try/demo_source/movie.mp4',

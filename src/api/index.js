@@ -44,8 +44,8 @@ export default {
     /**
      * 首页
      */
-    dynamicList() {
-        return $get('/dynamic/dynamicOut');
+    dynamicList(params) {
+        return $get('/dynamic/dynamicOut', params);
     },
     /**
      * 发表动态
@@ -55,6 +55,7 @@ export default {
      * @param {description} params 
      */
     dynamicPost(params) {
+        debugger
         return $post('/dynamic/saveDynamic', params);
     },
     /**
