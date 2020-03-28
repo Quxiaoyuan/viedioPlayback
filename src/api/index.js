@@ -55,7 +55,6 @@ export default {
      * @param {description} params 
      */
     dynamicPost(params) {
-        debugger
         return $post('/dynamic/saveDynamic', params);
     },
     /**

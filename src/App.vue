@@ -11,7 +11,7 @@
 								@select="handleNavSelect">
 					<el-menu-item index="myHomePage">我的主页</el-menu-item>
 					<el-menu-item index="myCollectPage">我的收藏</el-menu-item>
-					<el-menu-item index="myHistoryPage">我的关注</el-menu-item>
+					<el-menu-item index="myAttention">我的关注</el-menu-item>
 					<!-- <el-menu-item index="personalPage">个人中心</el-menu-item> -->
 				</el-menu>
 			</nav>
@@ -99,7 +99,7 @@ export default {
 				break;
 				case 'myCollectPage':this.$router.push({name:'collectPage'})
 				break;
-				case 'myHistoryPage':this.$router.push({name:'historyPage'})
+				case 'myAttention':this.$router.push({name:'myAttention'})
 				break;
 				default:""
 			}	

@@ -8,6 +8,7 @@ const editArticle = () => import('@/views/editArticle'); // 编辑评论
 const collectPage = () => import('@/views/collectPage'); // 我的收藏
 const historyPage = () => import('@/views/historyPage'); // 历史记录
 const personalPage = () => import('@/views/personalPage'); // 个人中心
+const myAttention = () => import('@/views/myAttention');
 
 Vue.use(Router);
 
@@ -51,6 +52,11 @@ const router = new Router({
 			path:'/personalPage',
 			name:'personalPage',
 			component:personalPage
+		},
+		{	
+			path:'/myAttention',
+			name:'myAttention',
+			component:myAttention
 		}
 	]
 })

@@ -96,20 +96,24 @@ export default {
   computed: {
     ...mapState({
         getUserInfo: state => state.userInfo
-      })
+      }),
+      cardList: state => state.cardList,
+      getIndex() {
+        return this.cardList.findIndex(x => x.objectId === this.objectId)
+      }
   },
   methods: {
     replayHandle(item, index, childIndex, isChild) {
       const showComment = item.showComment;
       if (isChild) {
         this.$set(this.commentList[index].commentforcomList[childIndex], 'showComment', !showComment);
+        this.$store.commit('updata')
       } else {
         this.$set(this.commentList[index], 'showComment', !showComment);
       }
       
     },
     async sendCommentHandle1(item, pItem, child = false) {
-      debugger
       if (!item.commentContent) return;
       const params = {
         senderId: this.getUserInfo.objectId,
@@ -132,6 +136,7 @@ export default {
       };
       const res = await this.$store.dispatch('addcommentDynamic', params); 
       if (res) {
+        this.commentContent = '';
         this.$emit('commentSuccess');
       }
     }

@@ -5,7 +5,10 @@ import Vuex from 'vuex';
 const state = {
 	// isLogin: false,
 	isLogin: false, // 测试，默认为登录成功
-	userInfo: {}
+  userInfo: {},
+  cardList: [],
+  collectList: [],
+  attentionList: []
 };
 const mutations = {
     updateLoginStatus({ commit }, params) {
@@ -13,6 +16,18 @@ const mutations = {
     },
     updateUserInfo({ commit }, params) {
       state.userInfo = params;
+    },
+    updataList({ commit }, params) {
+      state[params.listType] = params.data;
+    },
+    updateListCommentProp({ commit }, params) {
+      state[params].forEach((item) => {
+        Vue.set(item, 'showComment', false);
+        Vue.set(item, 'commentList', []);
+      })
+    },
+    updateListProp({ commit }, params) {
+      Vue.set(state[params.listType][params.index], params.key, params.value)
     }
 };
 const actions = {
@@ -25,7 +40,6 @@ const actions = {
 			return res;
     },
     async dynamicPost({ commit }, params) {
-      debugger
 			const res = await Api.dynamicPost(params);
 			return res;
     },
@@ -55,6 +69,26 @@ const actions = {
     },
     async cancelFavorite({ commit }, params) {
       const res = await Api.cancelFavorite(params);
+      return res;
+    },
+    async queryUserInfo({ commit }, params) {
+      const res = await Api.queryUserInfo(params);
+      return res
+    },
+    async updateUserInfo({ commit }, params) {
+      const res = await Api.updateUserInfo(params);
+      return res;
+    },
+    async attentionOther({ commit }, params) {
+      const res = await Api.attentionOther(params);
+      return res;
+    },
+    async myAttention({ commit }, params) {
+      const res = await Api.myAttention(params);
+      return res;
+    },
+    async cancelAttention({ commit }, params) {
+      const res = await Api.cancelAttention(params);
       return res;
     }
 };

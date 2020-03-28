@@ -16,11 +16,11 @@
               <span>{{item.description}}</span>
             </div>
             <div class="card-foot">
-              <!-- <el-button 
+              <el-button 
                 icon="el-icon-view" 
                 size="small" 
                 type="primary"
-                @click="attentionHandle">关注</el-button> -->
+                @click="attentionHandle(item, index)">{{item.likeCount ? '取消关注' : '关注'}}</el-button>
               <div class="card-food-common" @click="commentHandle(item, index)">
                 <i class="el-icon-s-comment"></i>
                 <span>{{item.showComment ? '收起评论' : '评论'}}</span>
@@ -35,7 +35,7 @@
               :commentList="item.commentList"
               :sendId="item.sendId"
               :objectId="item.objectId"
-              @commentSuccess="commentHandle(item, index)"></comment>
+              @commentSuccess="commentHandleReq(item, index)"></comment>
           </div>
         </div>
       </div>
@@ -59,7 +59,7 @@ export default {
   data() {
     return {
       baseUrl: "http://106.13.198.47:20",
-      cardList: [],
+      // cardList: [],
       src: ""
     };
   },
@@ -71,7 +71,8 @@ export default {
   },
   computed: {
     ...mapState({
-        getUserInfo: state => state.userInfo
+        getUserInfo: state => state.userInfo,
+        cardList: state => state.cardList
       })
   },
   methods: {
@@ -82,7 +83,11 @@ export default {
       const res = await this.$store.dispatch("dynamicList", params);
       if (res) {
         const data = res.data || {};
-        this.cardList = data.data || [];
+        const commitData = {
+          listType: 'cardList',
+          data: data.data || []
+        }
+        this.$store.commit('updataList', commitData)
         this.$nextTick(() => {
           this.setSrc();
           this.setPropShowComment();
@@ -90,10 +95,11 @@ export default {
       }
     },
     setPropShowComment() {
-      this.cardList.forEach((item) => {
-        this.$set(item, 'showComment', false);
-        this.$set(item, 'commentList', []);
-      })
+      // this.cardList.forEach((item) => {
+      //   this.$set(item, 'showComment', false);
+      //   this.$set(item, 'commentList', []);
+      // })
+      this.$store.commit('updateListCommentProp', 'cardList')
     },
     setSrc() {
       this.cardList.forEach((item, index) => {
@@ -108,12 +114,39 @@ export default {
     toEditArticle() {
       this.$router.push({ path: "/editArticle" });
     },
-    attentionHandle() {
-
+    async attentionHandle(item, index) {
+      const params = {
+        userId: this.getUserInfo.objectId,
+        attentionId: item.sendId
+      };
+      const type = this.cardList[index].likeCount;
+      const url = type === 1 ? 'cancelAttention' : 'attentionOther';
+      debugger
+      const res = await this.$store.dispatch(url, params);
+      if (res) {
+        const setType = type === 0 ? 1 : 0;
+        // this.$set(this.cardList[index], 'likeCount', setType);
+        const commitData = {
+          listType: 'cardList',
+          index,
+          key: 'likeCount',
+          value: setType
+        };
+        this.$store.commit('updateListProp', commitData);
+        this.$message({
+            showClose: true,
+            message: res.data.msg,
+            type: 'success'
+        });
+      }
     },
     async commentHandle(item, index) {
       item.showComment = !item.showComment;
       if (!item.showComment) return;
+      this.commentHandleReq(item, index)
+      // console.log(this.cardList);
+    },
+    async commentHandleReq(item, index) {
       const params = {
         dyId: item.objectId
       };
@@ -121,20 +154,28 @@ export default {
       if (res && res.data) {
         const commentList = res.data.data;
         if (commentList.length) {
-          commentList.forEach((it) => {
-            if (it.commentforcomList && it.commentforcomList.length) {
-              it.commentforcomList.forEach((x) => {
-                x.showComment = false;
-                x.commentContent = '';
-              })
-            }
-            it.showComment = false;
-            it.commentContent = '';
-          })
-          this.$set(this.cardList[index], 'commentList', commentList);
+          if (!this.cardList[index].commentList.length) {
+            commentList.forEach((it) => {
+              if (it.commentforcomList && it.commentforcomList.length) {
+                it.commentforcomList.forEach((x) => {
+                  x.showComment = false;
+                  x.commentContent = '';
+                })
+              }
+              it.showComment = false;
+              it.commentContent = '';
+            })
+          }
+          // this.$set(this.cardList[index], 'commentList', commentList);
+          const commitData = {
+            listType: 'cardList',
+            index,
+            key: 'commentList',
+            value: commentList
+          };
+          this.$store.commit('updateListProp', commitData);
         }
       }
-      console.log(this.cardList);
     },
     async collectHandle(item, index) {
       const params = {
@@ -146,7 +187,14 @@ export default {
       const res = await this.$store.dispatch(url, params);
       if (res && res.data) {
         const setType = type === 0 ? 1 : 0;
-        this.$set(this.cardList[index], 'type', setType);
+        // this.$set(this.cardList[index], 'type', setType);
+        const commitData = {
+          listType: 'cardList',
+          index,
+          key: 'type',
+          value: setType
+        };
+        this.$store.commit('updateListProp', commitData);
         this.$message({
             showClose: true,
             message: res.data.msg,

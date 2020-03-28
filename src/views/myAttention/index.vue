@@ -4,7 +4,7 @@
       <div class="left-header"></div>
       <div class="left-container">
         <div class="left-container-scroll">
-          <div class="left-card" v-for="(item, index) in collectList" :key="index">
+          <div class="left-card" v-for="(item, index) in attentionList" :key="index">
             <div class="left-card-title">{{item.title}}</div>
             <div class="left-card-container">
               <video :ref="'video' + index" width="350" height="180" controls="controls">
@@ -13,14 +13,19 @@
               <span>{{item.description}}</span>
             </div>
             <div class="card-foot">
-              <div class="card-food-common" @click="commentHandle(item, index)">
-                <i class="el-icon-s-comment"></i>
-                <span>{{item.showComment ? '收起评论' : '评论'}}</span>
-              </div>
-              <div class="card-food-common" @click="collectHandle(item, index)">
-                <i class="el-icon-star-on"></i>
-                <span>{{item.type === 1 ? '取消收藏' : '收藏'}}</span>
-              </div>
+                <el-button 
+                    icon="el-icon-view" 
+                    size="small" 
+                    type="primary"
+                    @click="attentionHandle(item, index)">{{item.likeCount ? '取消关注' : '关注'}}</el-button>
+                <div class="card-food-common" @click="commentHandle(item, index)">
+                    <i class="el-icon-s-comment"></i>
+                    <span>{{item.showComment ? '收起评论' : '评论'}}</span>
+                </div>
+                <!-- <div class="card-food-common" @click="collectHandle(item, index)">
+                    <i class="el-icon-star-on"></i>
+                    <span>{{item.type === 1 ? '取消收藏' : '收藏'}}</span>
+                </div> -->
             </div>
             <comment 
               v-show="item.showComment" 
@@ -42,7 +47,7 @@ import { mapState } from 'vuex';
 export default {
   data() {
     return {
-      collectList: []
+      attentionList: []
     }
   },
   components: {
@@ -54,17 +59,17 @@ export default {
     })
   },
   created() {
-    this.getCollectList();
+    this.getAttentionList();
   },
   methods: {
-    async getCollectList() {
+    async getAttentionList() {
       const params = {
-        userId: this.getUserInfo.objectId
+        objectId: this.getUserInfo.objectId
       };
-      const res = await this.$store.dispatch('myFavorite', params);
+      const res = await this.$store.dispatch('myAttention', params);
       if (res) {
         const data = res.data.data;
-        this.collectList = data;
+        this.attentionList = data || [];
         this.$nextTick(() => {
           this.setSrc();
           this.setPropShowComment();
@@ -72,13 +77,13 @@ export default {
       }
     },
     setPropShowComment() {
-      this.collectList.forEach((item) => {
+      this.attentionList.forEach((item) => {
         this.$set(item, 'showComment', false);
         this.$set(item, 'commentList', []);
       })
     },
     setSrc() {
-      this.collectList.forEach((item, index) => {
+      this.attentionList.forEach((item, index) => {
         const refs = this.$refs[`video${index}`] || [];
         if (refs.length) {
           refs.forEach((ref) => {
@@ -100,7 +105,7 @@ export default {
       if (res && res.data) {
         const commentList = res.data.data;
         if (commentList.length) {
-          if (!this.collectList[index].commentList.length) {
+          if (!this.attentionList[index].commentList.length) {
             commentList.forEach((it) => {
               if (it.commentforcomList && it.commentforcomList.length) {
                 it.commentforcomList.forEach((x) => {
@@ -112,28 +117,45 @@ export default {
               it.commentContent = '';
             })
           }
-          this.$set(this.collectList[index], 'commentList', commentList);
+          this.$set(this.attentionList[index], 'commentList', commentList);
         }
       }
-      console.log(this.collectList);
+      console.log(this.attentionList);
     },
     async collectHandle(item, index) {
       const params = {
         userId: this.getUserInfo.objectId,
         dyId: item.objectId
       };
-      const type = this.collectList[index].type;
+      const type = this.attentionList[index].type;
       const url = type === 1 ? 'cancelFavorite' : 'addFavorite';
       const res = await this.$store.dispatch(url, params);
       if (res && res.data) {
         const setType = type === 0 ? 1 : 0;
-        // this.$set(this.collectList[index], 'type', setType);
-        this.collectList.splice(index, 1)
+        // this.$set(this.attentionList[index], 'type', setType);
+        this.attentionList.splice(index, 1)
         this.$message({
             showClose: true,
             message: res.data.msg,
             type: 'success'
         });
+      }
+    },
+    async attentionHandle(item, index) {
+      const params = {
+        userId: this.getUserInfo.objectId,
+        attentionId: item.sendId
+      };
+      const type = this.attentionList[index].likeCount;
+      const url = type === 1 ? 'cancelAttention' : 'attentionOther';
+      const res = await this.$store.dispatch(url, params);
+      if (res) {
+        this.$message({
+            showClose: true,
+            message: res.data.msg,
+            type: 'success'
+        });
+        this.getAttentionList()
       }
     }
   }
