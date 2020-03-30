@@ -11,20 +11,21 @@
             <el-form-item label="动态描述" prop="description">
                 <el-input v-model="formLabelAlign.description"></el-input>
             </el-form-item>
-            <!-- <el-form-item>
-                <el-button type="primary" @click="submitForm('ruleForm')">立即发表</el-button>
-            </el-form-item> -->
+            
             <el-form-item label="添加视频即可发表" prop="address">
                 <el-upload
+                    ref="upload"
                     class="avatar-uploader"
                     :action="actionUrl"
-                    accept='.mp4,.qlv,.qsv,.ogg,.flv,.avi,.wmv,.rmvb'
-                    :data="paramsdata"                                
+                    :data="paramsdata"
+                    :on-change="changeFile"
+                    accept='.mp4,.qlv,.qsv,.ogg,.flv,.avi,.wmv,.rmvb'                             
                     :show-file-list="false"
                     :before-upload="beforeUploadVideo"
                     :on-success="handleVideoSuccess"                   
                     :on-progress="uploadVideoProcess"
-                    :on-error="handleVideoError">
+                    :on-error="handleVideoError"
+                    :auto-upload="false">
                     <!-- <div slot="tip" class="uploader-tips">上传视频</div> -->
                     <video
                         v-if="Video !='' && videoFlag == false"
@@ -43,6 +44,9 @@
                         style="margin-top:30px"
                     ></el-progress>
                 </el-upload>
+                <el-form-item>
+                    <el-button type="primary" @click="submitForm('ruleForm')">立即发表</el-button>
+                </el-form-item>
             </el-form-item>
         </el-form>
     </div>
@@ -54,7 +58,7 @@ export default {
     data() {
         return {
             videoFlag:false,      //刚开始的时候显示为flase
-            videoUploadPercent: '0%',  //进度条刚开始的时候为0%
+            videoUploadPercent: 0,  //进度条刚开始的时候为0%
             actionUrl: 'http://localhost:8088/dynamic/saveDynamic',
             Video: '',
             formLabelAlign: {
@@ -84,47 +88,52 @@ export default {
         })
     },
     methods: {
-        // submitForm(ref) {
-        //     this.$refs[ref].validate((valid) => {
-        //         if (valid) {
-        //             this.dynamicPost();
-        //         } else {
-        //             console.log('error submit!!');
-        //             return false;
-        //         }
-        //     });
+        submitForm(ref) {
+            this.$refs[ref].validate((valid) => {
+                if (valid) {
+                    this.$refs.upload.submit();
+                } else {
+                    console.log('error submit!!');
+                    return false;
+                }
+            });
+        },
+        // async dynamicPost() {
+        //     debugger
+        //     const { title, address, description } = this.formLabelAlign;
+        //     const params = {
+        //         video: address,
+        //         sendId: this.getUserInfo.objectId,
+        //         title,
+        //         description
+        //     };
+        //     const res = await this.$store.dispatch('dynamicPost', params);
+        //     debugger
+        //     if (res && res.data.code == '0') {
+        //         this.$router.push('/home');
+        //     }
         // },
-        async dynamicPost() {
-            const { title, address, description } = this.formLabelAlign;
-            const params = {
-                video: address,
-                sendId: this.getUserInfo.objectId,
-                title,
-                description
-            };
-            const res = await this.$store.dispatch('dynamicPost', params);
-            if (res && res.data.code == '0') {
-                this.$router.push('/home');
-            }
+        changeFile(file) {
+            this.Video = URL.createObjectURL(file.raw);
+            this.formLabelAlign.address = file.raw;
         },
         beforeUploadVideo(file) {          //视频上传之前判断他的大小
             const isLt10M = file.size / 1024 / 1024  < 2000;
-             this.formLabelAlign.address = file;
-            const { title, description } = this.formLabelAlign;
+            const { title, description, address } = this.formLabelAlign;
             if (!isLt10M) {
                 this.$message.error('上传视频大小不能超过2000MB哦!');
                 return false;
             }
-            if (!title || !description) {
-                this.$message.error('请填写信息');
-                return false;
-            }
-            this.paramsdata = {
-                video: file,
-                sendId: this.getUserInfo.objectId,
-                title,
-                description
-            };
+            return new Promise((resolve, reject) => {
+                this.paramsdata = {
+                    video: address,
+                    sendId: this.getUserInfo.objectId,
+                    title,
+                    description
+                };
+                resolve()
+            })
+            
 
         },
         uploadVideoProcess(event, file, fileList){    //视频上传的时候获取上传进度传给进度条
@@ -133,9 +142,6 @@ export default {
             console.log(this.videoUploadPercent)
         },
         handleVideoSuccess(res, file) {           //视频上传成功之后返回视频地址
-            this.videoFlag = false;
-            this.videoUploadPercent = 0;
-            console.log(res)
             const url = URL.createObjectURL(file.raw); 
             this.Video = url;
             this.$message({
